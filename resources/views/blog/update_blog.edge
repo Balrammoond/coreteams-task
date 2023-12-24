@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Blog Post</title>
+</head>
+<body>
+
+  <h1>Update Blog Post</h1>
+
+  <!-- Form for updating a blog post -->
+  <form action="/blog/getall/" method="post">
+    <div>
+      <!-- Title Field -->
+      <label for="title">Title:</label>
+      <input type="text" id="title" name="title" value="{{ flashMessages.get('title') || blog.title }}" required>
+      <br>
+      @if(flashMessages.has('errors.title'))
+        <small>{{ flashMessages.get('errors.title') }}</small>
+      @endif
+    </div>
+
+    <div>
+      <!-- Author Field -->
+      <label for="author">Author:</label>
+      <input type="text" id="author" name="author" value="{{ blog.author }}" required>
+      <br>
+      @if(flashMessages.has('errors.author'))
+        <small>{{ flashMessages.get('errors.author') }}</small>
+      @endif
+    </div>
+
+    <div>
+      <!-- Content Field -->
+      <label for="content">Content:</label>
+      <textarea id="content" name="content" required>{{ blog.content }}</textarea>
+      <br>
+      @if(flashMessages.has('errors.content'))
+        <small>{{ flashMessages.get('errors.content') }}</small>
+      @endif
+    </div>
+
+    <!-- Submit Button -->
+    <input type="submit" value="Update">
+  </form>
+
+</body>
+</html>

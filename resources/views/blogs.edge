@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Posts</title>
+</head>
+<body>
+
+  <h1>Create/Update Blog Post</h1>
+
+  <form action="/blog/create/" method="post">
+    <div>
+        <!-- Title Field -->
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" ><br>
+        @if(flashMessages.has('errors.title'))
+        <small>{{flashMessages.get('errors.title') }}</small>
+
+          @endif
+
+         </div>
+        <div>
+
+        <!-- Author Field -->
+        <label for="author">Author:</label>
+        <input type="text" id="author" name="author" ><br> </div>
+        @if(flashMessages.has('errors.author'))
+        <small>{{flashMessages.get('errors.author') }}</small>
+
+          @endif
+
+        <!-- Content Field -->
+        <div>
+        <label for="content">Content:</label>
+        <textarea id="content" name="content"></textarea><br> </div>
+        @if(flashMessages.has('errors.content'))
+        <small>{{flashMessages.get('errors.content') }}</small>
+
+          @endif
+
+        <!-- Submit Button -->
+        <input type="submit">Submit</input>
+    </form>
+
+  <hr>
+
+  <h1>All Blog Posts</h1>
+
+  <!-- Section to display all blog posts -->
+  <ul id="blogList"></ul>
+
+  <script>
+    async function createOrUpdateBlog() {
+      const author = document.getElementById('author').value;
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
+      const postId = document.getElementById('postId').value;
+
+      try {
+        if (postId) {
+          // Update existing post
+          await fetch(`/blog/update/${postId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ author, title, content }),
+          });
+        } else {
+          // Create new post
+          await fetch('/blog/create/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ author, title, content }),
+          });
+        }
+
+        clearForm();
+        renderBlogList();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function deleteBlog(postId) {
+      try {
+        await fetch(`/blog/delete/${postId}`, {
+          method: 'GET',
+        });
+
+        renderBlogList();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function editBlog(postId) {
+      const post = await fetch(`/blog/getall/${postId}`).then(response => response.json());
+      if (post) {
+        document.getElementById('author').value = post.author;
+        document.getElementById('title').value = post.title;
+        document.getElementById('content').value = post.content;
+        document.getElementById('postId').value = post.id;
+      }
+    }
+
+    function clearForm() {
+      document.getElementById('author').value = '';
+      document.getElementById('title').value = '';
+      document.getElementById('content').value = '';
+      document.getElementById('postId').value = '';
+    }
+
+    async function renderBlogList() {
+      const blogList = document.getElementById('blogList');
+      blogList.innerHTML = '';
+
+      try {
+        const blogs = await fetch('/blog/getall/').then(response => response.json());
+
+        if (blogs.length === 0) {
+          blogList.innerHTML = '<p>No blog posts available.</p>';
+        } else {
+          blogs.forEach(post => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+              <strong>${post.title}</strong> by ${post.author}
+              <p>${post.content}</p>
+              <button type="button" onclick="editBlog(${post.id})">Edit</button>
+              <button type="button" onclick="deleteBlog(${post.id})">Delete</button>
+            `;
+            blogList.appendChild(listItem);
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Initial render
+    renderBlogList();
+  </script>
+
+</body>
+</html>
